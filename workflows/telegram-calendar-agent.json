@@ -23,7 +23,7 @@
     },
     {
       "parameters": {
-        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "chatId": "={{ $('Telegram').first().json.message.chat.id }}",
         "text": "={{ $json.output }}",
         "additionalFields": {
           "appendAttribution": false
@@ -32,8 +32,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        96,
-        -192
+        176,
+        -80
       ],
       "id": "8775c35d-264d-4745-9fc1-d66dc1e41361",
       "name": "Send a text message",
@@ -48,9 +48,9 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "={{ $json.message.text }}",
+        "text": "={{ $json.body ? $json.body.message : $json.message.text }}",
         "options": {
-          "systemMessage": "You are my personal schedule assistant on Telegram. You talk to one person only: me.\n\nDATE AND TIME\nRight now it is {{ $now }}. My timezone is Asia/Kolkata (IST).\nAlways show times in IST, 24-hour format. Calendar data may come in UTC or GMT, so convert it to IST before replying.\n\nHOW TO ANSWER SCHEDULE QUESTIONS\n- Always use the Google Calendar tool. Never guess or invent events.\n- If I don't mention a date, assume today.\n- Understand \"today\", \"tomorrow\", \"this week\", \"next Monday\" and similar, using the current date above.\n- If an event ends on the next day, show the end date too.\n\nREPLY FORMAT\nOne event:\nYou have a schedule on [date] at [start - end IST]: [event title]\n\nSeveral events, one per line:\n[start - end] IST: [event title]\n\nIf an event has a meeting link, add it on a new line.\nIf there are no events: You have nothing scheduled on [date].\n\nSTYLE\n- Plain text only. No tables, no markdown, no bold, no bullet symbols.\n- Natural and friendly, but short. Maximum 3 lines unless I ask for details.\n- Don't repeat the whole schedule if I only say thanks or hey. Just reply briefly, like \"Anytime!\" or \"Hey! Want me to check your schedule?\"\n- Don't add extra advice, long greetings, or questions I didn't ask for.\n- Ask a question only if my request is truly unclear."
+          "systemMessage": "You are my personal schedule assistant on Telegram. You talk to one person only: me.\n\nDATE AND TIME\nRight now it is {{ $now }}. My timezone is Asia/Kolkata (IST).\nAlways show times in IST, 24-hour format. Calendar data may come in UTC or GMT, so convert it to IST before replying.\n\nHOW TO ANSWER SCHEDULE QUESTIONS\n- Always use the Google Calendar tool. Never guess or invent events.\n- If I don't mention a date, assume today.\n- Understand \"today\", \"tomorrow\", \"this week\", \"next Monday\" and similar, using the current date above.\n- If an event ends on the next day, show the end date too.\n\nREPLY FORMAT\nOne event:\nYou have a schedule on [date] at [start - end IST]: [event title]\n\nSeveral events, one per line:\n[start - end] IST: [event title]\n\nIf an event has a meeting link, add it on a new line.\nIf there are no events: You have nothing scheduled on [date].\n\nSTYLE\n- Plain text only. No tables, no markdown, no bold, no bullet symbols.\n- Natural and friendly, but short. Maximum 3 lines unless I ask for details.\n- Don't repeat the whole schedule if I only say thanks or hey. Just reply briefly, like \"Anytime!\" or \"Hey! Want me to check your schedule?\"\n- Don't add extra advice, long greetings, or questions I didn't ask for.\n- Ask a question only if my request is truly unclear.\n\nTIME-BASED QUESTIONS\nIf I ask about a specific time (\"after 11 pm\", \"this evening\"), check which events overlap that time, including events that started earlier and are still running. Answer the question directly, for example:\n\"You're in n8n Project Meeting until 03:30 IST. Nothing else after that.\"\nor \"Nothing scheduled after 11 pm.\"\n"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -91,6 +91,57 @@
     },
     {
       "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "e68e5dee-66db-4c7f-897b-c876e07913c2",
+              "leftValue": "={{ $('React').isExecuted }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        -64,
+        -144
+      ],
+      "id": "f49c9d04-d65b-45ef-8e2f-8bcffa25eed5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "calendar-chat",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        -688,
+        -32
+      ],
+      "id": "9a2919ab-f04d-428e-b4ca-c35010d3e747",
+      "name": "React",
+      "webhookId": "a54a6088-1f29-4f0e-9b6d-845cc77c015f"
+    },
+    {
+      "parameters": {
         "updates": [
           "message"
         ],
@@ -99,11 +150,11 @@
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.5,
       "position": [
-        -656,
-        -144
+        -704,
+        -272
       ],
       "id": "bc7552de-cf7e-46e5-8692-b90c023b25f5",
-      "name": "Telegram Trigger",
+      "name": "Telegram",
       "webhookId": "e37bc384-e822-4596-add7-0dbbb23bbc09",
       "credentials": {
         "telegramApi": {
@@ -111,6 +162,21 @@
           "name": "Telegram account"
         }
       }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"reply\": $json.output } }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        176,
+        -240
+      ],
+      "id": "0108ba99-5110-45a5-9a4b-dbe21d3b418d",
+      "name": "Respond to Webhook"
     }
   ],
   "pinData": {},
@@ -130,7 +196,7 @@
       "main": [
         [
           {
-            "node": "Send a text message",
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -148,11 +214,40 @@
         ]
       ]
     },
-    "Telegram Trigger": {
+    "React": {
       "main": [
         [
           {
             "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
             "type": "main",
             "index": 0
           }
@@ -165,7 +260,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "1da5727d-622e-4d38-b931-790611a1afa3",
+  "versionId": "d7a65819-4e0f-4f68-968c-f547f199c3bd",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "217bde4a0a32a636803629127a8b24224e09cd2a36c4cd5b439e6aac3040a6dc"
