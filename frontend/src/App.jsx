@@ -1,7 +1,7 @@
 import { useState } from "react";
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import ChatPage from "./components/ChatPage.jsx";
+import ChatPage from "./pages/ChatPage.jsx";
 
 const App = () => {
   return (
