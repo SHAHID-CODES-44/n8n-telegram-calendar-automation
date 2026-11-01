@@ -1,0 +1,177 @@
+/* Reset + full page setup */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+/* Page wrapper — full viewport height */
+.chat-page {
+  width: 100vw;
+  height: 100vh;              /* exactly laptop screen height */
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  padding: 16px;
+}
+
+/* Main card — 90% width, full height */
+.chat-container {
+  width: 90%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  overflow: hidden;           /* keep children contained */
+}
+
+/* Header */
+.chat-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0;
+  color: #111827;
+  flex-shrink: 0;             /* don't shrink when messages grow */
+}
+
+/* Message area — flexes to fill remaining space */
+.chat-messages {
+  flex: 1;                    /* takes all leftover height */
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  overflow-y: auto;            /* scroll inside, not page */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;              /* critical for flex overflow to work */
+}
+
+/* Individual message */
+.chat-message {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  word-wrap: break-word;
+  max-width: 70%;
+  font-size: 0.95rem;
+}
+
+.chat-message .sender {
+  font-weight: 600;
+  margin-right: 6px;
+}
+
+/* User bubble */
+.chat-message.user {
+  background: #e0e7ff;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.chat-message.user .sender {
+  color: #3730a3;
+}
+
+/* Bot bubble */
+.chat-message.bot {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.chat-message.bot .sender {
+  color: #047857;
+}
+
+/* Typing indicator */
+.chat-typing {
+  font-style: italic;
+  color: #6b7280;
+  font-size: 0.9rem;
+  padding: 4px 14px;
+  align-self: flex-start;
+  margin: 0;
+}
+
+/* Input row — pinned at bottom */
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.chat-input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.chat-input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.chat-send-btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  background: #4f46e5;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.chat-send-btn:hover:not(:disabled) {
+  background: #4338ca;
+}
+
+.chat-send-btn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.chat-send-btn:disabled {
+  background: #a5b4fc;
+  cursor: not-allowed;
+}
+
+/* Small screens: drop the 90% constraint */
+@media (max-width: 768px) {
+  .chat-page {
+    padding: 0;
+  }
+  .chat-container {
+    width: 100%;
+    border-radius: 0;
+    padding: 16px;
+  }
+  .chat-message {
+    max-width: 85%;
+  }
+}

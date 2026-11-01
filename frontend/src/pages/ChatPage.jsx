@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { sendChatMessage } from '../api/chat';
+import './ChatPage.css';
 
 function ChatPage() {
   const [messages, setMessages] = useState([]);
@@ -29,31 +30,43 @@ function ChatPage() {
   }
 
   return (
-    <div>
-      <h1>Calendar Assistant</h1>
+  <div className="chat-page">
+    <div className="chat-container">
+      <h1 className="chat-title">Calendar Assistant</h1>
 
-      <div>
+      <div className="chat-messages">
         {messages.map((msg, index) => (
-          <p key={index} style={{ whiteSpace: 'pre-wrap' }}>
-            <strong>{msg.role === 'user' ? 'You' : 'Bot'}:</strong> {msg.text}
+          <p key={index} className={`chat-message ${msg.role}`}>
+            <span className="sender">
+              {msg.role === 'user' ? 'You' : 'Bot'}:
+            </span>
+            {msg.text}
           </p>
         ))}
-        {loading && <p>Bot is typing...</p>}
+        {loading && <p className="chat-typing">Bot is typing...</p>}
       </div>
 
-      <input
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') handleSend();
-        }}
-        placeholder="Ask about your schedule..."
-      />
-      <button onClick={handleSend} disabled={loading}>
-        Send
-      </button>
+      <div className="chat-input-row">
+        <input
+          className="chat-input"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleSend();
+          }}
+          placeholder="Ask about your schedule..."
+        />
+        <button
+          className="chat-send-btn"
+          onClick={handleSend}
+          disabled={loading}
+        >
+          Send
+        </button>
+      </div>
     </div>
-  );
+  </div>
+);
 }
 
-export default ChatPage;    
+export default ChatPage;
