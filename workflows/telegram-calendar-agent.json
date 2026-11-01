@@ -1,0 +1,176 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "openai/gpt-oss-120b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        64
+      ],
+      "id": "ef81cd39-203a-47ec-8ab3-ddb15e965597",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "HehNxEdDTzon66Pu",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        96,
+        -192
+      ],
+      "id": "8775c35d-264d-4745-9fc1-d66dc1e41361",
+      "name": "Send a text message",
+      "webhookId": "33ffc00a-a8bc-4276-ae84-89f9bcee5146",
+      "credentials": {
+        "telegramApi": {
+          "id": "5o7DBnTaU2xvx8N3",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "You are my personal schedule assistant on Telegram. You talk to one person only: me.\n\nDATE AND TIME\nRight now it is {{ $now }}. My timezone is Asia/Kolkata (IST).\nAlways show times in IST, 24-hour format. Calendar data may come in UTC or GMT, so convert it to IST before replying.\n\nHOW TO ANSWER SCHEDULE QUESTIONS\n- Always use the Google Calendar tool. Never guess or invent events.\n- If I don't mention a date, assume today.\n- Understand \"today\", \"tomorrow\", \"this week\", \"next Monday\" and similar, using the current date above.\n- If an event ends on the next day, show the end date too.\n\nREPLY FORMAT\nOne event:\nYou have a schedule on [date] at [start - end IST]: [event title]\n\nSeveral events, one per line:\n[start - end] IST: [event title]\n\nIf an event has a meeting link, add it on a new line.\nIf there are no events: You have nothing scheduled on [date].\n\nSTYLE\n- Plain text only. No tables, no markdown, no bold, no bullet symbols.\n- Natural and friendly, but short. Maximum 3 lines unless I ask for details.\n- Don't repeat the whole schedule if I only say thanks or hey. Just reply briefly, like \"Anytime!\" or \"Hey! Want me to check your schedule?\"\n- Don't add extra advice, long greetings, or questions I didn't ask for.\n- Ask a question only if my request is truly unclear."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -384,
+        -144
+      ],
+      "id": "4e3d162e-03b5-413d-a829-fc67f7090347",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "shahidfirozaba@gmail.com",
+          "mode": "list",
+          "cachedResultName": "shahidfirozaba@gmail.com"
+        },
+        "limit": 20,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -224,
+        64
+      ],
+      "id": "e158e73e-79ca-4e4a-a5f2-4fa6469f4574",
+      "name": "Get many events in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "LzogEiZ5A2Mn8FEe",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -656,
+        -144
+      ],
+      "id": "bc7552de-cf7e-46e5-8692-b90c023b25f5",
+      "name": "Telegram Trigger",
+      "webhookId": "e37bc384-e822-4596-add7-0dbbb23bbc09",
+      "credentials": {
+        "telegramApi": {
+          "id": "5o7DBnTaU2xvx8N3",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1da5727d-622e-4d38-b931-790611a1afa3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "217bde4a0a32a636803629127a8b24224e09cd2a36c4cd5b439e6aac3040a6dc"
+  },
+  "nodeGroups": [],
+  "id": "t1SyOKXecWm9dzRW",
+  "tags": []
+}
