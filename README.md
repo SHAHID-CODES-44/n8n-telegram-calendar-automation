@@ -1,6 +1,6 @@
 # n8n Telegram Calendar Agent
 
-## What is this project?
+## About the Project
 
 A personal schedule assistant that lives in Telegram. You message the bot, for example "What is on my calendar today?", and it checks your Google Calendar and replies with your events, with times shown in your own timezone.
 
