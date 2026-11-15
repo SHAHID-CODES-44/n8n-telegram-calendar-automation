@@ -175,3 +175,8 @@ body {
     max-width: 85%;
   }
 }
+
+.chat-page-title {
+  display: block;
+  gap: 20px;
+}

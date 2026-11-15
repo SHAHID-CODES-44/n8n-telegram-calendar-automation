@@ -6,7 +6,7 @@ function ChatPage() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const bottomRef = useRef(null);
 
   useEffect(() => {
@@ -38,8 +38,10 @@ function ChatPage() {
   return (
     <div className="chat-page">
       <div className="chat-container">
-        <h1 className="chat-title">Calendar Assistant</h1>
-
+        <div className="chat-page-title">
+          <h1 className="chat-title">Calendar Assistant</h1>
+          <h4>Email : shahidfirozaba@gmail.com</h4>
+        </div>
         <div className="chat-messages">
           {messages.map((msg, index) => (
             <p key={index} className={`chat-message ${msg.role}`}>
