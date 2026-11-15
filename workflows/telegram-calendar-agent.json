@@ -1,16 +1,16 @@
 {
-  "name": "My workflow",
+  "name": "n8n-calender-agent",
   "nodes": [
     {
       "parameters": {
-        "model": "openai/gpt-oss-120b",
+        "model": "=openai/gpt-oss-120b",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
       "typeVersion": 1,
       "position": [
-        -480,
-        64
+        -560,
+        16
       ],
       "id": "ef81cd39-203a-47ec-8ab3-ddb15e965597",
       "name": "Groq Chat Model",
@@ -50,7 +50,7 @@
         "promptType": "define",
         "text": "={{ $json.body ? $json.body.message : $json.message.text }}",
         "options": {
-          "systemMessage": "You are my personal schedule assistant on Telegram. You talk to one person only: me.\n\nDATE AND TIME\nRight now it is {{ $now }}. My timezone is Asia/Kolkata (IST).\nAlways show times in IST, 24-hour format. Calendar data may come in UTC or GMT, so convert it to IST before replying.\n\nHOW TO ANSWER SCHEDULE QUESTIONS\n- Always use the Google Calendar tool. Never guess or invent events.\n- If I don't mention a date, assume today.\n- Understand \"today\", \"tomorrow\", \"this week\", \"next Monday\" and similar, using the current date above.\n- If an event ends on the next day, show the end date too.\n\nREPLY FORMAT\nOne event:\nYou have a schedule on [date] at [start - end IST]: [event title]\n\nSeveral events, one per line:\n[start - end] IST: [event title]\n\nIf an event has a meeting link, add it on a new line.\nIf there are no events: You have nothing scheduled on [date].\n\nSTYLE\n- Plain text only. No tables, no markdown, no bold, no bullet symbols.\n- Natural and friendly, but short. Maximum 3 lines unless I ask for details.\n- Don't repeat the whole schedule if I only say thanks or hey. Just reply briefly, like \"Anytime!\" or \"Hey! Want me to check your schedule?\"\n- Don't add extra advice, long greetings, or questions I didn't ask for.\n- Ask a question only if my request is truly unclear.\n\nTIME-BASED QUESTIONS\nIf I ask about a specific time (\"after 11 pm\", \"this evening\"), check which events overlap that time, including events that started earlier and are still running. Answer the question directly, for example:\n\"You're in n8n Project Meeting until 03:30 IST. Nothing else after that.\"\nor \"Nothing scheduled after 11 pm.\"\n"
+          "systemMessage": "You are my personal schedule assistant on Telegram. You talk to one person only: me.\n\nDATE AND TIME\n- Right now it is {{ $now }}. My timezone is Asia/Kolkata (IST).\n- Show times in IST, 12-hour format, like 9 AM, 12 PM, 12 AM, 1 PM, 3 PM.\n- Calendar data may come in UTC or GMT. Convert it to IST before replying.\n- If I don't mention a date, assume today.\n- Understand \"today\", \"tomorrow\", \"this week\", \"next Monday\" and similar, using the current date above.\n\nTOOLS\n- GET_EVENT: read events and find an event ID.\n- CREATE_EVENT: add a new event.\n- UPDATE_EVENT: change an existing event.\n- DELETE_EVENT: remove an event.\nNever guess or invent events or event IDs. Always use GET_EVENT to read the calendar.\n\nVIEWING EVENTS\n- Use GET_EVENT.\n- If an event ends on the next day, show the end date too.\n- If an event has a meeting link, add it on a new line.\n- If there are no events: You have nothing scheduled on [date].\n\nCREATING EVENTS\n- I need to give a title and a time. If the title or time is missing, ask once.\n- Send times to the tool as ISO 8601 with the +05:30 offset. Example: \"10 PM to 11 PM\" today becomes 22:00 to 23:00 on today's date.\n- First use GET_EVENT to check that nothing overlaps. If something does, tell me and ask before creating.\n- Then use CREATE_EVENT.\n\nEDITING EVENTS\n- First use GET_EVENT to find the event and its ID.\n- If more than one event matches, list them and ask which one.\n- Then use UPDATE_EVENT. Change only what I asked for and keep the rest the same.\n\nDELETING EVENTS\n- First use GET_EVENT to find the event and its ID.\n- If more than one event matches, list them and ask which one.\n- Ask me to confirm: \"Delete [title] on [date], [time]? Yes or no.\"\n- Use DELETE_EVENT only after I reply yes.\n\nREPLY FORMAT\n- One event: You have a schedule on [date] at [start - end IST]: [event title]\n- Several events, one per line: [start - end] IST: [event title]\n- After a change, one line: Done: [title] added on [date], [start - end IST]. (Use \"updated\" or \"deleted\" as needed.)\n- If a tool fails, say so in one line and don't pretend it worked.\n\nTIME-BASED QUESTIONS\nIf I ask about a specific time (\"after 11 PM\", \"this evening\"), check which events overlap that time, including events that started earlier and are still running. Answer directly, for example:\n\"You're in n8n Project Meeting until 3:30 AM IST. Nothing else after that.\"\nor \"Nothing scheduled after 11 PM.\"\n\nSTYLE\n- Plain text only. No tables, no markdown, no bold, no bullet symbols.\n- Natural and friendly, but short. Keep replies to 3 lines, except when listing a schedule.\n- If I only say thanks or hey, reply briefly, like \"Anytime!\" or \"Hey! Want me to check your schedule?\"\n- Don't add extra advice, long greetings, or questions I didn't ask for.\n- Ask a question only if my request is truly unclear.\n\nCONFIRMATIONS\n- When I reply yes, ok, or similar, it answers your last question. Look at the previous message and carry out that action.\n- If I reply no, cancel and say \"Cancelled.\"\n\nDELETING MANY EVENTS\n- If I ask to delete several or all events, use GET_EVENT to list them, then ask me once to confirm the whole list.\n- After I say yes, call DELETE_EVENT once for each event.\n- Never delete only the first one and stop."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -61,33 +61,6 @@
       ],
       "id": "4e3d162e-03b5-413d-a829-fc67f7090347",
       "name": "AI Agent"
-    },
-    {
-      "parameters": {
-        "operation": "getAll",
-        "calendar": {
-          "__rl": true,
-          "value": "shahidfirozaba@gmail.com",
-          "mode": "list",
-          "cachedResultName": "shahidfirozaba@gmail.com"
-        },
-        "limit": 20,
-        "options": {}
-      },
-      "type": "n8n-nodes-base.googleCalendarTool",
-      "typeVersion": 1.3,
-      "position": [
-        -224,
-        64
-      ],
-      "id": "e158e73e-79ca-4e4a-a5f2-4fa6469f4574",
-      "name": "Get many events in Google Calendar",
-      "credentials": {
-        "googleCalendarOAuth2Api": {
-          "id": "LzogEiZ5A2Mn8FEe",
-          "name": "Google Calendar account"
-        }
-      }
     },
     {
       "parameters": {
@@ -133,8 +106,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.2,
       "position": [
-        -688,
-        -32
+        -816,
+        -48
       ],
       "id": "9a2919ab-f04d-428e-b4ca-c35010d3e747",
       "name": "React",
@@ -150,8 +123,8 @@
       "type": "n8n-nodes-base.telegramTrigger",
       "typeVersion": 1.5,
       "position": [
-        -704,
-        -272
+        -816,
+        -256
       ],
       "id": "bc7552de-cf7e-46e5-8692-b90c023b25f5",
       "name": "Telegram",
@@ -177,6 +150,128 @@
       ],
       "id": "0108ba99-5110-45a5-9a4b-dbe21d3b418d",
       "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Creates a new calendar event. Needs a title, start time and end time",
+        "calendar": {
+          "__rl": true,
+          "value": "shahidfirozaba@gmail.com",
+          "mode": "list",
+          "cachedResultName": "shahidfirozaba@gmail.com"
+        },
+        "start": "={{ $fromAI('start', 'Start time in ISO 8601 with +05:30 offset, for example 2026-11-15T22:00:00+05:30', 'string') }}",
+        "end": "={{ $fromAI('end', 'End time in ISO 8601 with +05:30 offset, for example 2026-11-15T23:00:00+05:30', 'string') }}",
+        "additionalFields": {
+          "summary": "={{ $fromAI('summary', 'Title of the event, for example Movie Watch', 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -272,
+        64
+      ],
+      "id": "b58c557a-8949-485d-8bc4-090735c8109f",
+      "name": "CREATE_EVENT",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "LzogEiZ5A2Mn8FEe",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "shahidfirozaba@gmail.com",
+          "mode": "list",
+          "cachedResultName": "shahidfirozaba@gmail.com"
+        },
+        "limit": 20,
+        "timeMin": "={{ $now.startOf('day') }}",
+        "timeMax": "={{ $now.plus({ days: 2 }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -400,
+        64
+      ],
+      "id": "e158e73e-79ca-4e4a-a5f2-4fa6469f4574",
+      "name": "GET_EVENT",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "LzogEiZ5A2Mn8FEe",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Changes an existing event. Needs the event ID from GET_EVENT",
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "shahidfirozaba@gmail.com",
+          "mode": "list",
+          "cachedResultName": "shahidfirozaba@gmail.com"
+        },
+        "eventId": "={{ $fromAI('eventId', 'ID of the event to update. Get it from GET_EVENT first, never guess', 'string') }}",
+        "updateFields": {
+          "end": "={{ $fromAI('end', 'New end time in ISO 8601 with +05:30 offset', 'string') }}",
+          "start": "={{ $fromAI('start', 'New start time in ISO 8601 with +05:30 offset', 'string') }}",
+          "summary": "={{ $fromAI('summary', 'New title of the event', 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        -128,
+        64
+      ],
+      "id": "ea275222-e790-450b-b917-ff5da1e0f13a",
+      "name": "UPDATE_EVENT",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "LzogEiZ5A2Mn8FEe",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Deletes an event permanently. Needs the event ID from GET_EVENT",
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "shahidfirozaba@gmail.com",
+          "mode": "list",
+          "cachedResultName": "shahidfirozaba@gmail.com"
+        },
+        "eventId": "={{ $fromAI('eventId', 'ID of the event to delete. Get it from GET_EVENT first, never guess', 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        64
+      ],
+      "id": "2b9a7366-34f8-4341-a241-b74ab2f990c2",
+      "name": "DELETE_EVENT",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "LzogEiZ5A2Mn8FEe",
+          "name": "Google Calendar account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -198,17 +293,6 @@
           {
             "node": "If",
             "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Get many events in Google Calendar": {
-      "ai_tool": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_tool",
             "index": 0
           }
         ]
@@ -253,6 +337,50 @@
           }
         ]
       ]
+    },
+    "CREATE_EVENT": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET_EVENT": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UPDATE_EVENT": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DELETE_EVENT": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -260,7 +388,7 @@
     "executionOrder": "v1",
     "binaryMode": "separate"
   },
-  "versionId": "d7a65819-4e0f-4f68-968c-f547f199c3bd",
+  "versionId": "afea6eb3-587a-4364-98cb-5a48852452e2",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "217bde4a0a32a636803629127a8b24224e09cd2a36c4cd5b439e6aac3040a6dc"
